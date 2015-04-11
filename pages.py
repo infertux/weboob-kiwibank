@@ -19,10 +19,11 @@
 
 
 import datetime
+import re
 from decimal import Decimal
 from weboob.browser.pages import HTMLPage, LoggedPage
 from weboob.capabilities.bank import Account
-from weboob.tools.capabilities.bank.transactions import AmericanTransaction as Transaction
+from weboob.tools.capabilities.bank.transactions import AmericanTransaction as EnglishTransaction
 
 __all__ = ['LoginPage', 'AccountPage', 'HistoryPage']
 
@@ -60,8 +61,14 @@ class HistoryPage(LoggedPage, HTMLPage):
         for el in self.doc.getroot().cssselect('div#content tr.row'):
             transaction = Transaction()
 
-            transaction.type = Transaction.TYPE_UNKNOWN
-            transaction.label = unicode(el.cssselect('td.tranDesc')[0].text)
+            label = unicode(el.cssselect('td.tranDesc')[0].text)
+            transaction.label = label
+
+            for pattern, _type in Transaction.PATTERNS:
+                match = pattern.match(label)
+                if match:
+                    transaction.type = _type
+                    break
 
             date = el.cssselect('td.tranDate')[0].text
             transaction.date = datetime.datetime.strptime(date, '%d %b \'%y')
@@ -70,4 +77,10 @@ class HistoryPage(LoggedPage, HTMLPage):
             transaction.amount = Decimal(Transaction.clean_amount(amount))
 
             yield transaction
+
+class Transaction(EnglishTransaction):
+    PATTERNS = [(re.compile(r'^POS W/D (?P<text>.*)'),    EnglishTransaction.TYPE_CARD),
+                (re.compile(r'^ATM W/D (?P<text>.*)'),    EnglishTransaction.TYPE_WITHDRAWAL),
+                (re.compile(r'^(PAY|FROM) (?P<text>.*)'), EnglishTransaction.TYPE_TRANSFER),
+               ]
 
