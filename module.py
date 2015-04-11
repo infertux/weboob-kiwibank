@@ -19,6 +19,7 @@
 
 
 from weboob.capabilities.bank import CapBank, AccountNotFound
+from weboob.capabilities.base import find_object
 from weboob.tools.backend import Module, BackendConfig
 from weboob.tools.value import ValueBackendPassword
 from .browser import KiwiBank
@@ -41,23 +42,13 @@ class KiwiBankModule(Module, CapBank):
         return self.create_browser(self.config['username'].get(), self.config['password'].get())
 
     def iter_accounts(self):
-        return self.browser.iter_accounts()
+        return self.browser.get_accounts()
 
-    # def get_account(self, _id):
-    #     with self.browser:
-    #         account = self.browser.get_account(_id)
-    #     if account:
-    #         return account
-    #     else:
-    #         raise AccountNotFound()
+    def get_account(self, _id):
+        return find_object(self.browser.get_accounts(), id=_id, error=AccountNotFound)
 
-    # def iter_history(self, account):
-    #     with self.browser:
-    #         for history in self.browser.get_history(account):
-    #             yield history
+    def iter_history(self, account):
+        for transaction in self.browser.get_history(account):
+            yield transaction
 
-    # TODO
-    #def iter_coming(self, account):
-    #    with self.browser:
-    #        for coming in self.browser.get_coming_operations(account):
-    #            yield coming
+    #def iter_coming(self, account): # TODO

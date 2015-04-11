@@ -27,6 +27,6 @@ class KiwiBankTest(BackendTest):
 
     def test_kiwibank(self):
         l = list(self.backend.iter_accounts())
-        # if len(l) > 0:
-        #     a = l[0]
-        #     list(self.backend.iter_history(a)) # TODO
+        if len(l) > 0:
+            a = l[0]
+            list(self.backend.iter_history(a))

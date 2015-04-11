@@ -18,12 +18,13 @@
 # along with weboob. If not, see <http://www.gnu.org/licenses/>.
 
 
+import datetime
 from decimal import Decimal
 from weboob.browser.pages import HTMLPage, LoggedPage
 from weboob.capabilities.bank import Account
 from weboob.tools.capabilities.bank.transactions import AmericanTransaction as Transaction
 
-__all__ = ['LoginPage', 'ListPage']
+__all__ = ['LoginPage', 'AccountPage', 'HistoryPage']
 
 class LoginPage(HTMLPage):
     def login(self, username, password):
@@ -32,7 +33,7 @@ class LoginPage(HTMLPage):
         form['ctl00$chi$txtPassword'] = password
         form.submit()
 
-class ListPage(LoggedPage, HTMLPage):
+class AccountPage(LoggedPage, HTMLPage):
     def get_accounts(self):
         for el in self.doc.getroot().cssselect('div#content tr.row'):
             account = Account()
@@ -43,10 +44,30 @@ class ListPage(LoggedPage, HTMLPage):
             account.currency = u'NZD' # TODO: handle other currencies
 
             if el.cssselect('td.AccountName > a'):
-                label_el = el.cssselect('td.AccountName > a')
+                label_el = el.cssselect('td.AccountName > a')[0]
+                account._link = label_el.get('href')
             else:
-                label_el = el.cssselect('td.AccountName')
+                label_el = el.cssselect('td.AccountName')[0]
+                account._link = None
 
-            account.label = unicode(label_el[0].text.strip())
+            account.label = unicode(label_el.text.strip())
 
             yield account
+
+class HistoryPage(LoggedPage, HTMLPage):
+    def get_history(self):
+        # TODO: get more results from "next" page, only 15 transactions per page
+        for el in self.doc.getroot().cssselect('div#content tr.row'):
+            transaction = Transaction()
+
+            transaction.type = Transaction.TYPE_UNKNOWN
+            transaction.label = unicode(el.cssselect('td.tranDesc')[0].text)
+
+            date = el.cssselect('td.tranDate')[0].text
+            transaction.date = datetime.datetime.strptime(date, '%d %b \'%y')
+
+            amount = el.cssselect('td.tranAmnt')[0].text
+            transaction.amount = Decimal(Transaction.clean_amount(amount))
+
+            yield transaction
+

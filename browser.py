@@ -20,10 +20,14 @@
 
 from weboob.browser import LoginBrowser, URL, need_login
 from weboob.exceptions import BrowserIncorrectPassword
-from .pages import LoginPage, ListPage#, AccountHistory, CardHistory, UpdateInfoPage, AuthenticationPage
+from .pages import LoginPage, AccountPage, HistoryPage
 
 
 __all__ = ['KiwiBank']
+
+
+class HistoryUnavailable(Exception):
+    pass
 
 
 class KiwiBank(LoginBrowser):
@@ -33,8 +37,8 @@ class KiwiBank(LoginBrowser):
 
     login = URL('login/', LoginPage)
     login_error = URL('login-error/', LoginPage)
-    accounts = URL('accounts/$', ListPage)
-    # account = URL('/accounts/view/[0-9]+$', AccountHistory)
+    accounts = URL('accounts/$', AccountPage)
+    account = URL('/accounts/view/[0-9A-F]+$', HistoryPage)
 
     # def home(self):
     #     return self.login.go()
@@ -47,25 +51,16 @@ class KiwiBank(LoginBrowser):
             raise BrowserIncorrectPassword()
 
     @need_login
-    def iter_accounts(self):
+    def get_accounts(self):
         self.accounts.stay_or_go()
         return self.page.get_accounts()
 
-    # @need_login
-    # def get_history(self, account):
-    #     if account._link_id is None:
-    #         return
-    #     self.location(account._link_id)
+    @need_login
+    def get_history(self, account):
+        if account._link is None:
+            raise HistoryUnavailable()
 
-    #     if self.page is None:
-    #         return
+        self.location(account._link)
 
-    #     if self.cbPage.is_here():
-    #         guesser = LinearDateGuesser(date_max_bump=timedelta(45))
-    #         return self.page.get_history(date_guesser=guesser)
-    #     else:
-    #         return self._get_history()
+        return self.page.get_history()
 
-    # def _get_history(self):
-    #     for tr in self.page.get_history():
-    #         yield tr
