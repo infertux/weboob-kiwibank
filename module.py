@@ -24,7 +24,9 @@ from weboob.tools.backend import Module, BackendConfig
 from weboob.tools.value import ValueBackendPassword
 from .browser import KiwiBank
 
+
 __all__ = ['KiwiBankModule']
+
 
 class KiwiBankModule(Module, CapBank):
     NAME = 'kiwibank'
@@ -33,9 +35,10 @@ class KiwiBankModule(Module, CapBank):
     VERSION = '1.0'
     LICENSE = 'AGPLv3+'
     DESCRIPTION = u'KiwiBank'
-    CONFIG = BackendConfig(ValueBackendPassword('username', label='Username', masked=False),
-                           ValueBackendPassword('password', label='Password'),
-                          )
+    CONFIG = BackendConfig(
+        ValueBackendPassword('username', label='Username', masked=False),
+        ValueBackendPassword('password', label='Password'),
+    )
     BROWSER = KiwiBank
 
     def create_default_browser(self):
@@ -50,5 +53,3 @@ class KiwiBankModule(Module, CapBank):
     def iter_history(self, account):
         for transaction in self.browser.get_history(account):
             yield transaction
-
-    #def iter_coming(self, account): # TODO

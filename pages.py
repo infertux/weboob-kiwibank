@@ -25,7 +25,9 @@ from weboob.browser.pages import HTMLPage, LoggedPage
 from weboob.capabilities.bank import Account
 from weboob.tools.capabilities.bank.transactions import AmericanTransaction as EnglishTransaction
 
+
 __all__ = ['LoginPage', 'AccountPage', 'HistoryPage']
+
 
 class LoginPage(HTMLPage):
     def login(self, username, password):
@@ -33,6 +35,7 @@ class LoginPage(HTMLPage):
         form['ctl00$chi$txtUserName'] = username
         form['ctl00$chi$txtPassword'] = password
         form.submit()
+
 
 class AccountPage(LoggedPage, HTMLPage):
     def get_accounts(self):
@@ -42,7 +45,7 @@ class AccountPage(LoggedPage, HTMLPage):
             balance = el.cssselect('td.Balance')[0].text
             account.balance = Decimal(Transaction.clean_amount(balance))
             account.id = el.cssselect('span')[0].text.strip()
-            account.currency = u'NZD' # TODO: handle other currencies
+            account.currency = u'NZD'  # TODO: handle other currencies
 
             if el.cssselect('td.AccountName > a'):
                 label_el = el.cssselect('td.AccountName > a')[0]
@@ -54,6 +57,7 @@ class AccountPage(LoggedPage, HTMLPage):
             account.label = unicode(label_el.text.strip())
 
             yield account
+
 
 class HistoryPage(LoggedPage, HTMLPage):
     def get_history(self):
@@ -78,9 +82,10 @@ class HistoryPage(LoggedPage, HTMLPage):
 
             yield transaction
 
-class Transaction(EnglishTransaction):
-    PATTERNS = [(re.compile(r'^POS W/D (?P<text>.*)'),    EnglishTransaction.TYPE_CARD),
-                (re.compile(r'^ATM W/D (?P<text>.*)'),    EnglishTransaction.TYPE_WITHDRAWAL),
-                (re.compile(r'^(PAY|FROM) (?P<text>.*)'), EnglishTransaction.TYPE_TRANSFER),
-               ]
 
+class Transaction(EnglishTransaction):
+    PATTERNS = [
+        (re.compile(r'^POS W/D (?P<text>.*)'), EnglishTransaction.TYPE_CARD),
+        (re.compile(r'^ATM W/D (?P<text>.*)'), EnglishTransaction.TYPE_WITHDRAWAL),
+        (re.compile(r'^(PAY|FROM) (?P<text>.*)'), EnglishTransaction.TYPE_TRANSFER),
+    ]

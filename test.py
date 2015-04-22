@@ -20,7 +20,9 @@
 
 from weboob.tools.test import BackendTest
 
+
 __all__ = ['KiwiBankTest']
+
 
 class KiwiBankTest(BackendTest):
     MODULE = 'kiwibank'

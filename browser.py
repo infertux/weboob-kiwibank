@@ -40,9 +40,6 @@ class KiwiBank(LoginBrowser):
     accounts = URL('accounts/$', AccountPage)
     account = URL('/accounts/view/[0-9A-F]+$', HistoryPage)
 
-    # def home(self):
-    #     return self.login.go()
-
     def do_login(self):
         self.login.stay_or_go()
         self.page.login(self.username, self.password)
@@ -63,4 +60,3 @@ class KiwiBank(LoginBrowser):
         self.location(account._link)
 
         return self.page.get_history()
-
