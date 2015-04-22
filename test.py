@@ -21,10 +21,10 @@
 from weboob.tools.test import BackendTest
 
 
-__all__ = ['KiwiBankTest']
+__all__ = ['KiwibankTest']
 
 
-class KiwiBankTest(BackendTest):
+class KiwibankTest(BackendTest):
     MODULE = 'kiwibank'
 
     def test_kiwibank(self):

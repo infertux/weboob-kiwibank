@@ -18,6 +18,6 @@
 # along with weboob. If not, see <http://www.gnu.org/licenses/>.
 
 
-from .module import KiwiBankModule
+from .module import KiwibankModule
 
-__all__ = ['KiwiBankModule']
+__all__ = ['KiwibankModule']

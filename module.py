@@ -22,24 +22,24 @@ from weboob.capabilities.bank import CapBank, AccountNotFound
 from weboob.capabilities.base import find_object
 from weboob.tools.backend import Module, BackendConfig
 from weboob.tools.value import ValueBackendPassword
-from .browser import KiwiBank
+from .browser import Kiwibank
 
 
-__all__ = ['KiwiBankModule']
+__all__ = ['KiwibankModule']
 
 
-class KiwiBankModule(Module, CapBank):
+class KiwibankModule(Module, CapBank):
     NAME = 'kiwibank'
     MAINTAINER = u'Cédric Félizard'
     EMAIL = 'cedric@felizard.fr'
     VERSION = '1.0'
     LICENSE = 'AGPLv3+'
-    DESCRIPTION = u'KiwiBank'
+    DESCRIPTION = u'Kiwibank'
     CONFIG = BackendConfig(
         ValueBackendPassword('username', label='Username', masked=False),
         ValueBackendPassword('password', label='Password'),
     )
-    BROWSER = KiwiBank
+    BROWSER = Kiwibank
 
     def create_default_browser(self):
         return self.create_browser(self.config['username'].get(), self.config['password'].get())
